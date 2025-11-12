@@ -1,14 +1,12 @@
-#include <iostream>
+п»ї#include <iostream>
 #include <vector>
 #include <queue>
-#include <chrono>
 #include <random>
 #include <stack>
 #include <string>
 #include <iomanip>
 
 using namespace std;
-using namespace std::chrono;
 
 class Graph
 {
@@ -47,8 +45,6 @@ public:
         }
         genAdjList();
     }
-
-
     void DFS(int start, bool show)
     {
         resetVisited();
@@ -67,26 +63,59 @@ public:
 
             for (int i = 0; i < vertexCount; i++)
             {
-                if (matrix[v][i] == 1)
+                if (matrix[v][i] >= 1)
                 {
-                    if (dist[i] == -1 || dist[i] > dist[v] + 1)
+                    if (dist[i] == -1 || dist[i] > dist[v] + matrix[v][i])
                     {
-                        dist[i] = dist[v] + 1;
+                        dist[i] = dist[v] + matrix[v][i];
                         st.push(i);
                     }
                 }
             }
         }
 
-        cout << "DFS (матрица смежности):\n";
+        cout << "DFS (РјР°С‚СЂРёС†Р° СЃРјРµР¶РЅРѕСЃС‚Рё):\n";
         if (show)
             showDist(dist);
     }
+    void DFS_true(int start, bool show)
+    {
+        const int INF = 1e9;
 
+        std::vector<int> dist(vertexCount, INF);
+        dist[start] = 0;
+
+        std::stack<int> st;
+        st.push(start);
+
+        while (!st.empty())
+        {
+            int v = st.top();
+            st.pop();
+
+            for (int i = 0; i < vertexCount; i++)
+            {
+                if (matrix[v][i] >= 1)
+                {
+                    // РјРѕР¶РЅРѕ 
+                    if (dist[v] + matrix[v][i] < dist[i])
+                    {
+                        dist[i] = dist[v] + matrix[v][i];
+                        st.push(i);
+                    }
+                }
+            }
+        }
+        std::cout << "DFS (РїРѕРёСЃРє РєСЂР°С‚С‡Р°Р№С€РёС… СЂР°СЃСЃС‚РѕСЏРЅРёР№):\n";
+        if (show)
+            showDist(dist);
+    }
     void BFS(int start, bool show)
     {
-        vector<int> dist(vertexCount, -1);
+        const int INF = 1e9;
+        vector<int> dist(vertexCount, INF);
         queue<int> q;
+
         dist[start] = 0;
         q.push(start);
 
@@ -97,27 +126,32 @@ public:
 
             for (int i = 0; i < vertexCount; i++)
             {
-                if (matrix[v][i] == 1 && dist[i] == -1)
+                if (matrix[v][i] <= 0) continue;
+
+                int w = matrix[v][i];
+
+                // СЂР°Р·СЂРµС€Р°СЋ СѓР»СѓС‡С€РµРЅРёРµ
+                if (dist[v] + w < dist[i])
                 {
-                    dist[i] = dist[v] + 1;
+                    dist[i] = dist[v] + w;
                     q.push(i);
                 }
             }
         }
 
-        cout << "BFS (матрица смежности):\n";
-        if (show)
-            showDist(dist);
+        cout << "BFS (РјР°С‚СЂРёС†Р° СЃРјРµР¶РЅРѕСЃС‚Рё):\n";
+        if (show) showDist(dist);
     }
-
     void DFS_adj(int start, bool show)
     {
+        const int INF = 1e9;
         resetVisited();
+
+        vector<int> dist(vertexCount, INF);
+        dist[start] = 0;
+
         stack<int> st;
         st.push(start);
-
-        vector<int> dist(vertexCount, -1);
-        dist[start] = 0;
 
         while (!st.empty())
         {
@@ -126,24 +160,27 @@ public:
 
             visited[v] = true;
 
-            for (int nb : adjList[v])
+            for (int to : adjList[v])
             {
-                if (dist[nb] == -1 || dist[nb] > dist[v] + 1)
+                int w = matrix[v][to]; // Р’Р•РЎ Р±РµСЂРµРј РёР· РјР°С‚СЂРёС†С‹!
+
+                if (dist[v] + w < dist[to])
                 {
-                    dist[nb] = dist[v] + 1;
-                    st.push(nb);
+                    dist[to] = dist[v] + w;
+                    st.push(to);
                 }
             }
         }
 
-        cout << "DFS (список смежности):\n";
+        cout << "DFS (СЃРїРёСЃРѕРє СЃРјРµР¶РЅРѕСЃС‚Рё):\n";
         if (show)
             showDist(dist);
     }
-
     void BFS_adj(int start, bool show)
     {
-        vector<int> dist(vertexCount, -1);
+        const int INF = 1e9;
+        vector<int> dist(vertexCount, INF);
+
         queue<int> q;
         dist[start] = 0;
         q.push(start);
@@ -153,24 +190,24 @@ public:
             int v = q.front();
             q.pop();
 
-            for (int nb : adjList[v])
+            for (int to : adjList[v])
             {
-                if (dist[nb] == -1)
+                int w = matrix[v][to]; // Р’Р•РЎ РёР· РјР°С‚СЂРёС†С‹
+
+                if (dist[v] + w < dist[to])
                 {
-                    dist[nb] = dist[v] + 1;
-                    q.push(nb);
+                    dist[to] = dist[v] + w;
+                    q.push(to);
                 }
             }
         }
 
-        cout << "BFS (список смежности):\n";
+        cout << "BFS (СЃРїРёСЃРѕРє СЃРјРµР¶РЅРѕСЃС‚Рё):\n";
         if (show)
             showDist(dist);
     }
-
-    // заданиe 2
-
-    // Возвращает вектор расстояний от одной вершины до всех остальных
+    // Р·Р°РґР°РЅРёe 2
+    // Р’РѕР·РІСЂР°С‰Р°РµС‚ РІРµРєС‚РѕСЂ СЂР°СЃСЃС‚РѕСЏРЅРёР№ РѕС‚ РѕРґРЅРѕР№ РІРµСЂС€РёРЅС‹ РґРѕ РІСЃРµС… РѕСЃС‚Р°Р»СЊРЅС‹С…
     vector<int> getDistancesFrom(int start)
     {
         vector<int> dist(vertexCount, 9999);
@@ -194,8 +231,7 @@ public:
         }
         return dist;
     }
-
-    // Эксцентриситет вершины
+    // Р­РєСЃС†РµРЅС‚СЂРёСЃРёС‚РµС‚ РІРµСЂС€РёРЅС‹
     int getEccentricity(int v)
     {
         vector<int> dist = getDistancesFrom(v);
@@ -205,8 +241,7 @@ public:
                 ecc = d;
         return ecc;
     }
-
-    // Радиус, диаметр, центральные и периферийные вершины
+    // Р Р°РґРёСѓСЃ, РґРёР°РјРµС‚СЂ, С†РµРЅС‚СЂР°Р»СЊРЅС‹Рµ Рё РїРµСЂРёС„РµСЂРёР№РЅС‹Рµ РІРµСЂС€РёРЅС‹
     void calcRadiusAndDiameter()
     {
         int radius = 9999;
@@ -220,25 +255,24 @@ public:
             if (ecc[v] > diameter) diameter = ecc[v];
         }
 
-        cout << "\n=== Радиус и диаметр графа ===\n";
-        cout << "Радиус графа: " << radius << "\n";
-        cout << "Диаметр графа: " << diameter << "\n";
+        cout << "\n=== Р Р°РґРёСѓСЃ Рё РґРёР°РјРµС‚СЂ РіСЂР°С„Р° ===\n";
+        cout << "Р Р°РґРёСѓСЃ РіСЂР°С„Р°: " << radius << "\n";
+        cout << "Р”РёР°РјРµС‚СЂ РіСЂР°С„Р°: " << diameter << "\n";
 
-        cout << "\nЦентральные вершины: ";
+        cout << "\nР¦РµРЅС‚СЂР°Р»СЊРЅС‹Рµ РІРµСЂС€РёРЅС‹: ";
         for (int i = 0; i < vertexCount; i++)
             if (ecc[i] == radius)
                 cout << i << " ";
 
-        cout << "\nПериферийные вершины: ";
+        cout << "\nРџРµСЂРёС„РµСЂРёР№РЅС‹Рµ РІРµСЂС€РёРЅС‹: ";
         for (int i = 0; i < vertexCount; i++)
             if (ecc[i] == diameter)
                 cout << i << " ";
         cout << "\n";
     }
-
     void print() const
     {
-        cout << "\n=== Матрица смежности ===\n   ";
+        cout << "\n=== РњР°С‚СЂРёС†Р° СЃРјРµР¶РЅРѕСЃС‚Рё ===\n   ";
         for (int j = 0; j < vertexCount; j++)
             cout << setw(2) << j << " ";
         cout << "\n";
@@ -251,26 +285,24 @@ public:
             cout << "\n";
         }
 
-        cout << "\n=== Список смежности ===\n";
+        cout << "\n=== РЎРїРёСЃРѕРє СЃРјРµР¶РЅРѕСЃС‚Рё ===\n";
         for (int i = 0; i < vertexCount; i++)
         {
             cout << setw(2) << i << ": ";
             if (adjList[i].empty())
-                cout << "пусто";
+                cout << "РїСѓСЃС‚Рѕ";
             else
                 for (int j : adjList[i])
                     cout << j << "(" << matrix[i][j] << ") ";
             cout << "\n";
         }
-        cout << "Вершин: " << vertexCount << ", Рёбер: " << edgeCount << "\n\n";
+        cout << "Р’РµСЂС€РёРЅ: " << vertexCount << ", Р С‘Р±РµСЂ: " << edgeCount << "\n\n";
     }
-
 private:
     void resetVisited()
     {
         fill(visited.begin(), visited.end(), false);
     }
-
     void genAdjList()
     {
         for (int i = 0; i < vertexCount; i++)
@@ -283,12 +315,12 @@ private:
             }
         }
     }
-
-    void showDist(const vector<int>& dist)
+    void showDist(const vector<int>& dist) const
     {
         for (int i = 0; i < vertexCount; i++)
             cout << "DIST[" << i << "] = "
-            << (dist[i] == -1 ? "нет связи" : to_string(dist[i])) << "\n";
+            << (dist[i] == -1 || dist[i] > 1000 ? "РЅРµС‚ СЃРІСЏР·Рё" : to_string(dist[i])) << "\n";
+        cout << "\n";
     }
 
     vector<vector<int>> matrix;
@@ -302,8 +334,12 @@ int main(int argc, char* argv[])
 {
     setlocale(LC_ALL, "RUSSIAN");
 
+    Graph gp;
+
+    int vertices = 0, start = 0;
+    double probability = 0.4;
     bool oriented = false;
-    bool weighted = true; // по умолчанию взвешенный
+    bool weighted = true; // РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РІР·РІРµС€РµРЅРЅС‹Р№
 
     for (int i = 1; i < argc; i++)
     {
@@ -311,24 +347,30 @@ int main(int argc, char* argv[])
         if (arg == "oriented") oriented = true;
         if (arg == "unweighted") weighted = false;
     }
-    Graph gp;
-    int vertices = 0;
-    double probability = 0.0;
 
-    cout << "Введите количество вершин: ";
+    cout << "Р’РІРµРґРёС‚Рµ РєРѕР»РёС‡РµСЃС‚РІРѕ РІРµСЂС€РёРЅ: ";
     cin >> vertices;
-    cout << "Введите вероятность связи (0.1 - 0.9): ";
-    cin >> probability;
+    cout << "Р’РµСЂРѕСЏС‚РЅРѕСЃС‚СЊ СЃРІСЏР·Рё: 0.4 \n\n";
 
-    gp.genAdjMatrix(vertices, probability, oriented, weighted);
-    gp.print();
+        gp.genAdjMatrix(vertices, probability, oriented, weighted);
+        gp.print();
 
-    gp.calcRadiusAndDiameter();
+    goto_start:
+    cout << "Р’РІРµРґРёС‚Рµ РІРµСЂС€РёРЅСѓ РґР»СЏ СЃС‚Р°СЂС‚Р°:";
+    cin >> start;
+    if (start > vertices || start < 0) goto goto_start;
 
-    cout << "\nТип графа: "
-        << (oriented ? "ориентированный" : "неориентированный") << ", "
-        << (weighted ? "взвешенный" : "невзвешенный") << endl;
+        gp.DFS(start, true);
+        gp.DFS_true(start, true);
+        gp.BFS(start, true);
+        gp.DFS_adj(start, true);
+        gp.BFS_adj(start, true);
+        gp.calcRadiusAndDiameter();
 
+    cout << "\nРўРёРї РіСЂР°С„Р°: "
+        << (oriented ? "РѕСЂРёРµРЅС‚РёСЂРѕРІР°РЅРЅС‹Р№" : "РЅРµРѕСЂРёРµРЅС‚РёСЂРѕРІР°РЅРЅС‹Р№") << ", "
+        << (weighted ? "РІР·РІРµС€РµРЅРЅС‹Р№" : "РЅРµРІР·РІРµС€РµРЅРЅС‹Р№") << endl;
+
+    system("pause");
     return 0;
 }
-
